@@ -16,6 +16,9 @@ public class HttpRequestHandler implements Runnable {
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true)
         ) {
+
+          //Logger.log("INFO", "Thread ID: " + Thread.currentThread().getId() + " handling client: " + socket.getInetAddress());
+
             String request = reader.readLine();
             if (request == null) return;
 
@@ -26,9 +29,9 @@ public class HttpRequestHandler implements Runnable {
             String path = parts[1];
 
             if (method.equals("GET")) {
-                if ("/".equals(path)) path = "../www/index.html";
+                if ("/".equals(path)) path = "/index.html";
                 serveFile(path, writer, output);
-            } else if (method.equals("POST") && path.equals("/submit.html")) {
+            } else if (method.equals("POST") && path.equals("/submit")) {
                 // Handle POST request (read data in parent thread, then isolate handler)
                 handlePost(reader, writer);
             } else {
@@ -47,16 +50,18 @@ public class HttpRequestHandler implements Runnable {
 
     private void serveFile(String path, PrintWriter writer, OutputStream output) {
         try {
-            File file = new File("../www", URLDecoder.decode(path, "UTF-8")).getCanonicalFile();
+            File file = new File("www", URLDecoder.decode(path, "UTF-8")).getCanonicalFile();
 
             // Prevent directory traversal
-            if (!file.getPath().startsWith(new File("../www").getCanonicalPath())) {
-                send404(writer);
+            if (!file.getPath().startsWith(new File("www").getCanonicalPath())) {
+                //send404(writer);
+                send403(writer);
                 Logger.log("WARN", "Blocked directory traversal: " + path);
                 return;
             }
 
-            if (file.exists() && file.isFile()) {
+
+             if (file.exists() && file.isFile()) {
                 byte[] content = Files.readAllBytes(file.toPath());
                 writer.print("HTTP/1.1 200 OK\r\n");
                 writer.print("Content-Length: " + content.length + "\r\n");
@@ -97,7 +102,7 @@ public class HttpRequestHandler implements Runnable {
 
             // ✅ Send HTTP 302 Redirect to success page
             writer.print("HTTP/1.1 302 Found\r\n");
-            writer.print("Location: ./submit.html\r\n");
+            writer.print("Location: /submit.html\r\n");
             writer.print("Content-Length: 0\r\n");
             writer.print("\r\n");
             writer.flush();
@@ -110,11 +115,6 @@ public class HttpRequestHandler implements Runnable {
     }
 
 
-
-
-
-
-
     private void send404(PrintWriter writer) {
         String body = "<html><body><h1>404 Not Found</h1></body></html>";
         writer.print("HTTP/1.1 404 Not Found\r\n");
@@ -123,4 +123,14 @@ public class HttpRequestHandler implements Runnable {
         writer.print(body);
         writer.flush();
     }
+
+    private void send403(PrintWriter writer) {
+        String body = "<html><body><h1>403 Forbidden</h1><p>You don't have permission to access this resource.</p></body></html>";
+        writer.print("HTTP/1.1 403 Forbidden\r\n");
+        writer.print("Content-Length: " + body.length() + "\r\n");
+        writer.print("Content-Type: text/html\r\n\r\n");
+        writer.print(body);
+        writer.flush();
+    }
+
 }
