@@ -26,7 +26,7 @@ public class HttpRequestHandler implements Runnable {
             String path = parts[1];
 
             if (method.equals("GET")) {
-                if ("/".equals(path)) path = "/index.html";
+                if ("/".equals(path)) path = "../www/index.html";
                 serveFile(path, writer, output);
             } else if (method.equals("POST") && path.equals("/submit.html")) {
                 // Handle POST request (read data in parent thread, then isolate handler)
@@ -47,10 +47,10 @@ public class HttpRequestHandler implements Runnable {
 
     private void serveFile(String path, PrintWriter writer, OutputStream output) {
         try {
-            File file = new File("www", URLDecoder.decode(path, "UTF-8")).getCanonicalFile();
+            File file = new File("../www", URLDecoder.decode(path, "UTF-8")).getCanonicalFile();
 
             // Prevent directory traversal
-            if (!file.getPath().startsWith(new File("www").getCanonicalPath())) {
+            if (!file.getPath().startsWith(new File("../www").getCanonicalPath())) {
                 send404(writer);
                 Logger.log("WARN", "Blocked directory traversal: " + path);
                 return;
@@ -97,7 +97,7 @@ public class HttpRequestHandler implements Runnable {
 
             // ✅ Send HTTP 302 Redirect to success page
             writer.print("HTTP/1.1 302 Found\r\n");
-            writer.print("Location: /submit.html\r\n");
+            writer.print("Location: ./submit.html\r\n");
             writer.print("Content-Length: 0\r\n");
             writer.print("\r\n");
             writer.flush();

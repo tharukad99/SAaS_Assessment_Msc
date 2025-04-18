@@ -17,7 +17,7 @@ public class FormHandler implements Runnable {
                 return;
             }
 
-            String filename = "submissions/submission-" + Instant.now().toEpochMilli() + ".txt";
+            String filename = "../submissions/submission-" + Instant.now().toEpochMilli() + ".txt";
             Files.write(Paths.get(filename), formData.getBytes(), StandardOpenOption.CREATE);
             Logger.log("INFO", "Form data saved to: " + filename);
 
