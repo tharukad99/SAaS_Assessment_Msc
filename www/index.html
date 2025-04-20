@@ -1,11 +1,19 @@
 <html>
 <body>
   <h1>Secure Java HTTP Server</h1>
-  <form method="POST" action="/submit.html">
-    Name: <input name="username"><br>
-    Message: <input name="message"><br>
-    <input type="submit">
+
+  <form method="POST" action="/submit">
+    <div>
+      <label>Name:</label><br>
+      <input name="username" type="text" style="width: 300px;"><br><br>
+    </div>
+
+    <div>
+      <label>Message:</label><br>
+      <input name="message" type="text" style="width: 300px;"><br><br>
+    </div>
+
+    <input type="submit" value="Submit">
   </form>
 </body>
 </html>
-
